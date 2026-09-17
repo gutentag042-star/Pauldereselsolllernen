@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paul, der Esel, soll lernen 🫏</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐵</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Caveat:wght@500;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6EFDF;
+    --paper-line:#E3D6B8;
+    --ink:#2B2A28;
+    --ink-soft:#5b584f;
+    --red:#B23A2E;
+    --red-dark:#8a2c22;
+    --gold:#C79A3D;
+    --green:#4C6E4A;
+    --card-shadow: 0 18px 40px rgba(43,42,40,0.18);
+    --focus: #2B6CB0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, #efe4c7 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, #efe4c7 0%, transparent 45%),
+      #E9E0C9;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  header{text-align:left;margin-bottom:20px;}
+  h1{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:clamp(2.4rem, 8vw, 3.4rem);
+    color:var(--red);
+    margin:0 0 2px 0;
+    line-height:1;
+    transform:rotate(-1.2deg);
+  }
+  .subtitle{
+    font-size:0.98rem;
+    color:var(--ink-soft);
+    max-width:54ch;
+    line-height:1.5;
+    margin:6px 0 0 2px;
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0 2px;}
+  .chip{
+    font-size:0.75rem;
+    border:1px solid var(--ink);
+    border-radius:3px;
+    padding:3px 9px;
+    color:var(--ink-soft);
+    background:transparent;
+  }
+
+  .howto{
+    margin:22px 0;
+    padding:14px 16px;
+    border-left:3px solid var(--gold);
+    background:rgba(199,154,61,0.10);
+    font-size:0.9rem;
+    line-height:1.55;
+    color:var(--ink);
+  }
+  .howto strong{color:var(--red-dark);}
+
+  /* The application-letter "paper" */
+  .paper{
+    position:relative;
+    background:
+      repeating-linear-gradient(
+        var(--paper) 0px, var(--paper) 27px,
+        var(--paper-line) 28px, var(--paper) 29px
+      );
+    border-radius:2px;
+    box-shadow:var(--card-shadow);
+    padding:34px 26px 30px;
+    transform:rotate(0.35deg);
+    margin-bottom:22px;
+  }
+  .paper::before{
+    content:"";
+    position:absolute; top:0; left:38px; bottom:0;
+    width:1px; background:rgba(178,58,46,0.28);
+  }
+  .letter-meta{
+    font-family:'Courier Prime', monospace;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    padding-left:14px;
+  }
+  .letter-body{
+    font-family:'Courier Prime', monospace;
+    font-size:0.98rem;
+    line-height:1.9;
+    padding-left:14px;
+    white-space:normal;
+  }
+  .seg{
+    cursor:pointer;
+    border-radius:2px;
+    padding:1px 2px;
+    transition:background .12s ease, box-shadow .12s ease;
+  }
+  .seg:hover{background:rgba(43,42,40,0.08);}
+  .seg:focus-visible{outline:2px solid var(--focus); outline-offset:1px;}
+  .seg.selected{
+    background:rgba(178,58,46,0.16);
+    box-shadow: inset 0 -2px 0 var(--red);
+  }
+  .seg.reveal-hit{ background:rgba(76,110,74,0.22); box-shadow: inset 0 -2px 0 var(--green);}
+  .seg.reveal-miss{ background:rgba(178,58,46,0.10); box-shadow: inset 0 -2px 0 var(--red-dark); text-decoration:wavy underline var(--red-dark); text-decoration-style:wavy;}
+  .seg.reveal-false{ background:rgba(43,42,40,0.06); box-shadow: inset 0 -2px 0 var(--ink-soft); opacity:0.75;}
+
+  .controls{display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 26px;}
+  button{
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    border-radius:4px;
+    padding:11px 20px;
+    border:2px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+  }
+  button.secondary{ background:transparent; color:var(--ink);}
+  button:disabled{opacity:0.4; cursor:default;}
+  button:focus-visible{outline:3px solid var(--focus); outline-offset:2px;}
+
+  .selected-count{
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    align-self:center;
+  }
+
+  /* Results */
+  #results{display:none;}
+  .score-row{
+    display:flex; align-items:baseline; gap:14px;
+    margin-bottom:6px;
+  }
+  .score-number{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:4.2rem;
+    color:var(--red);
+    line-height:1;
+  }
+  .score-label{color:var(--ink-soft); font-size:0.95rem;}
+
+  .reveal-list{
+    list-style:none; margin:18px 0 0; padding:0;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .reveal-list li{
+    font-size:0.88rem; line-height:1.5;
+    padding:10px 12px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.5);
+    border-left:3px solid var(--ink-soft);
+  }
+  .reveal-list li.hit{border-left-color:var(--green);}
+  .reveal-list li.miss{border-left-color:var(--red-dark);}
+  .reveal-list li.falsepos{border-left-color:var(--ink-soft); opacity:0.8;}
+  .reveal-list .tag{
+    display:inline-block; font-size:0.7rem; text-transform:none;
+    font-weight:700; margin-right:6px; padding:1px 6px; border-radius:3px;
+  }
+  li.hit .tag{background:rgba(76,110,74,0.25); color:#2f4a2d;}
+  li.miss .tag{background:rgba(178,58,46,0.18); color:var(--red-dark);}
+  li.falsepos .tag{background:rgba(43,42,40,0.1); color:var(--ink-soft);}
+
+  /* Monkey stage */
+  .monkey-stage{
+    margin-top:26px;
+    padding:22px 18px 18px;
+    border-radius:8px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .monkey-stage.bad{background:rgba(178,58,46,0.08);}
+  .monkey-stage.good{background:rgba(76,110,74,0.10);}
+  .monkey{
+    font-size:4rem;
+    display:inline-block;
+    line-height:1;
+  }
+  .monkey-stage.bad .monkey{ animation: shake 0.45s ease-in-out 2; transform-origin:center; }
+  .monkey-stage.good .monkey{ animation: twerk 0.55s ease-in-out 5; transform-origin:60% 90%; }
+  @keyframes shake{
+    0%,100%{transform:rotate(0deg);}
+    25%{transform:rotate(-14deg);}
+    75%{transform:rotate(14deg);}
+  }
+  @keyframes twerk{
+    0%,100%{transform:translateY(0) rotate(0deg) scaleY(1);}
+    30%{transform:translateY(6px) rotate(-7deg) scaleY(0.9);}
+    60%{transform:translateY(6px) rotate(7deg) scaleY(0.9);}
+  }
+  .speech{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--ink);
+    margin-top:10px;
+    max-width:46ch;
+    margin-left:auto; margin-right:auto;
+  }
+  .monkey-stage.bad .speech{color:var(--red-dark);}
+  .monkey-stage.good .speech{color:var(--green);}
+
+  footer{
+    margin-top:36px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .monkey-stage.bad .monkey, .monkey-stage.good .monkey{ animation:none; }
+  }
+
+  @media (max-width:480px){
+    .paper{padding:26px 16px 24px;}
+    .paper::before{left:26px;}
+    .letter-meta, .letter-body{padding-left:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Paul, der Esel, soll lernen</h1>
+    <p class="subtitle">Trainiere den Blick für schlechte Bewerbungsschreiben. Klicke auf jede Stelle im Brief, die du für einen Fehler hältst — dann lass dich vom Affen bewerten.</p>
+    <div class="chips">
+      <span class="chip">Kommafehler</span>
+      <span class="chip">Grammatikfehler</span>
+      <span class="chip">Rechtschreibfehler</span>
+      <span class="chip">falscher Ton</span>
+      <span class="chip">unpassende E-Mail</span>
+    </div>
+  </header>
+
+  <div class="howto">
+    <strong>So geht's:</strong> Unten siehst du eine zufällig ausgewählte, schlecht geschriebene Bewerbung. Tippe/klicke auf alle Wörter oder Satzteile, die du für falsch hältst (Rechtschreibung, Grammatik, Kommasetzung, unpassender Ton oder die E-Mail-Adresse). Danach auf <strong>„Auswerten“</strong> drücken. Ab 80&nbsp;% korrekt erkannten Fehlern bekommst du Applaus — darunter wird's peinlich.
+  </div>
+
+  <div class="paper">
+    <div class="letter-meta" id="letterMeta"></div>
+    <div class="letter-body" id="letterBody"></div>
+  </div>
+
+  <div class="controls">
+    <button id="checkBtn">Auswerten</button>
+    <button id="newBtn" class="secondary">Neue Bewerbung</button>
+    <span class="selected-count" id="selCount"></span>
+  </div>
+
+  <div id="results">
+    <div class="score-row">
+      <span class="score-number" id="scoreNumber">0%</span>
+      <span class="score-label">richtig erkannt</span>
+    </div>
+    <ul class="reveal-list" id="revealList"></ul>
+
+    <div class="monkey-stage" id="monkeyStage">
+      <span class="monkey" id="monkeyEmoji">🐵</span>
+      <div class="speech" id="monkeySpeech"></div>
+    </div>
+  </div>
+
+  <footer>Für den Deutschunterricht gebastelt · keine echten Bewerbungen verschicken, bitte 😉</footer>
+</div>
+
+<script>
+/* ---------- Datenpool: jedes Template ist eine schlecht geschriebene Bewerbung,
+   zerlegt in "Segmente". Jedes Segment ist entweder korrekt (err:false)
+   oder enthält einen Fehler (err:true) mit einer kurzen Erklärung. ---------- */
+
+const TEMPLATES = [
+  {
+    meta: "Bewerbung um ein Praktikum – KFZ-Werkstatt Rennwald",
+    segments: [
+      {t:"Hallo Leute,", err:true, hint:"Falscher Ton: Eine Bewerbung beginnt förmlich, z. B. mit „Sehr geehrte Damen und Herren,“."},
+      {t:" ich möchte mich hiermit für ein Praktikum in ", err:false},
+      {t:"ihrem", err:true, hint:"Groß-/Kleinschreibung: In Briefen wird die Höflichkeitsform „Ihrem“ großgeschrieben."},
+      {t:" Betrieb bewerben.", err:false},
+      {t:" Ich habe schon immer ", err:false},
+      {t:"intresse", err:true, hint:"Rechtschreibfehler: richtig ist „Interesse“."},
+      {t:" an Technik gehabt", err:false},
+      {t:" und deswegen würde ich gerne bei ", err:false},
+      {t:"euch", err:true, hint:"Falscher Ton: In einer Bewerbung duzt man nicht – „Ihnen“ statt „euch“."},
+      {t:" ein Praktikum machen.", err:false},
+      {t:" Meine ", err:false},
+      {t:"Notn", err:true, hint:"Rechtschreibfehler: richtig ist „Noten“."},
+      {t:" in Mathe und Physik sind besonders gut", err:false},
+      {t:" und ich interessiere mich auch für Autos.", err:true, hint:"Kommafehler: Vor „und“ fehlt ein Komma, weil zwei vollständige Hauptsätze verbunden werden."},
+      {t:" Ich habe schon ", err:false},
+      {t:"meine Onkel", err:true, hint:"Grammatikfehler: Nach „helfen“ steht der Dativ – richtig wäre „meinem Onkel“."},
+      {t:" in seiner Werkstatt geholfen,", err:false},
+      {t:" des war mega cool", err:true, hint:"Umgangssprache: „des“ statt „das“ und „mega cool“ passen nicht in eine Bewerbung."},
+      {t:" und ich habe dabei viel gelernt.", err:false},
+      {t:" Ich freue mich auf ", err:false},
+      {t:"eure", err:true, hint:"Falscher Ton: Höflichkeitsform fehlt – richtig wäre „Ihre Rückmeldung“."},
+      {t:" Rückmeldung.", err:false},
+      {t:" Mit freundlichen Grüßen,", err:false},
+      {t:" Tim Müller", err:false},
+      {t:" tim2cool@yahoo.com", err:true, hint:"Unseriöse E-Mail-Adresse: Für Bewerbungen sollte man eine neutrale Adresse nutzen, z. B. tim.mueller@mustergymnasium.eu."}
+    ]
+  },
+  {
+    meta: "Bewerbung um einen Ausbildungsplatz – Elektroniker bei Voss Elektrotechnik GmbH",
+    segments: [
+      {t:"Hey Voss Team,", err:true, hint:"Falscher Ton: „Hey“ und der informelle Gruß passen nicht zu einer Bewerbung."},
+      {t:" hiermit bewerbe ich mich um ", err:false},
+      {t:"einen Ausbildungsplatz als Elektroniker bei euch", err:true, hint:"Falscher Ton: „bei euch“ ist zu locker – besser „in Ihrem Unternehmen“."},
+      {t:".", err:false},
+      {t:" Ich habe schon länger ", err:false},
+      {t:"begeisterung", err:true, hint:"Rechtschreibfehler: Nomen werden großgeschrieben – richtig ist „Begeisterung“."},
+      {t:" für Elektronik", err:false},
+      {t:" weil ich zuhause gerne Schaltungen ", err:true, hint:"Kommafehler: Vor „weil“ muss ein Komma stehen, da ein Nebensatz beginnt."},
+      {t:"baue und löte.", err:false},
+      {t:" Letztes Jahr habe ich meine eigene Lautsprecherbox ", err:false},
+      {t:"gebaut, dass", err:true, hint:"Grammatikfehler: Nach „sodass/dass es“ – hier ist „die“ statt „dass“ richtig, da sich der Satz auf die Box bezieht."},
+      {t:" richtig gut klingt.", err:false},
+      {t:" In der Schule bin ich in ", err:false},
+      {t:"Mathe und Physik ziemlich fit,", err:false},
+      {t:" und mein Notendurchschnitt ist 2,1.", err:false},
+      {t:" Ich kann auch ", err:false},
+      {t:"gut mit meiner hände arbeiten", err:true, hint:"Grammatikfehler: „mit meinen Händen“ – Dativ Plural, nicht „meiner hände“."},
+      {t:" und bin sehr genau.", err:false},
+      {t:" Ich hoffe ihr meldet euch bald", err:true, hint:"Falscher Ton/fehlendes Komma: „ich hoffe, Sie melden sich bald“ – Höflichkeitsform und Komma vor dem Nebensatz fehlen."},
+      {t:" bei mir.", err:false},
+      {t:" LG", err:true, hint:"Falscher Ton: „LG“ ist eine Chat-Abkürzung, in Bewerbungen steht „Mit freundlichen Grüßen“."},
+      {t:" Jan Bergmann", err:false},
+      {t:" jani_zockt99@web.de", err:true, hint:"Unseriöse E-Mail-Adresse: Ein Spitzname wie „jani_zockt99“ wirkt unprofessionell."}
+    ]
+  },
+  {
+    meta: "Bewerbung um ein Schülerpraktikum – Softwarefirma Bitweise GmbH",
+    segments: [
+      {t:"Sehr geehrte Damen und Herren,", err:false},
+      {t:" ich schreibe euch", err:true, hint:"Falscher Ton: In einer förmlichen Anrede sollte durchgehend gesiezt werden, also „Ihnen“."},
+      {t:" weil ich mich für ein Schülerpraktikum interessiere.", err:false},
+      {t:" Programmieren ist mein ", err:false},
+      {t:"hobby", err:true, hint:"Rechtschreibfehler: Nomen werden großgeschrieben – richtig ist „Hobby“."},
+      {t:" seit ich zwölf bin", err:false},
+      {t:" ich habe bereits kleine Spiele in Python geschrieben.", err:true, hint:"Kommafehler: Hier fehlt ein Komma bzw. ein Punkt, da zwei vollständige Sätze ohne Verbindung aneinandergereiht werden."},
+      {t:" Außerdem habe ich mir selbst ", err:false},
+      {t:"HTML und CSS beigebracht,", err:false},
+      {t:" was mir sehr leicht ", err:false},
+      {t:"viel", err:true, hint:"Rechtschreibfehler: richtig ist „fiel“ (von „fallen“), nicht „viel“."},
+      {t:".", err:false},
+      {t:" Ich würde mich freuen, wenn ", err:false},
+      {t:"du", err:true, hint:"Falscher Ton: Plötzliches Duzen mitten in einer förmlichen Bewerbung passt nicht."},
+      {t:" mir eine Chance gibst,", err:false},
+      {t:" mein Wissen in einem echten Betrieb anzuwenden.", err:false},
+      {t:" Ich bin zuverlässig, lernbereit", err:false},
+      {t:" und einsatzbereit", err:true, hint:"Kommafehler: Vor dem letzten Aufzählungsglied mit „und“ steht in dieser Aufzählung zwar meist kein Komma, hier fehlt aber eines davor, weil ein weiterer eingeschobener Nebensatz folgt – „einsatzbereit, wenn nötig auch samstags“ wirkt ohne Komma holprig und unklar."},
+      {t:" wenn nötig auch samstags.", err:false},
+      {t:" Mit freundlichen Grüßen", err:false},
+      {t:" Lena Kraft", err:false},
+      {t:" lena.hackerqueen@gmx.de", err:true, hint:"Unseriöse E-Mail-Adresse: „hackerqueen“ wirkt nicht professionell, besser Vor- und Nachname verwenden."}
+    ]
+  },
+  {
+    meta: "Bewerbung um einen Ausbildungsplatz – Bürokauffrau bei Stein & Partner Steuerberatung",
+    segments: [
+      {t:"Liebes Team", err:true, hint:"Falscher Ton: Eine unbekannte Firma spricht man nicht mit „Liebes Team“ an, sondern förmlich mit „Sehr geehrte Damen und Herren“."},
+      {t:", ich würde super gerne bei ", err:true, hint:"Falscher Ton: „super gerne“ ist umgangssprachlich, in einer Bewerbung schreibt man sachlicher, z. B. „sehr gerne“."},
+      {t:"euch", err:true, hint:"Falscher Ton: Höflichkeitsform fehlt – richtig wäre „Ihnen“."},
+      {t:" eine Ausbildung als Bürokauffrau machen.", err:false},
+      {t:" Ich bin ", err:false},
+      {t:"immer pünktlich und Zuverlässig", err:true, hint:"Rechtschreibfehler: Adjektive werden kleingeschrieben – richtig ist „zuverlässig“."},
+      {t:", außerdem kann ich gut mit Menschen umgehen.", err:false},
+      {t:" In der Schule hatte ich ein Praktikum bei ", err:false},
+      {t:"einer Anwaltskanzlei gemacht", err:true, hint:"Grammatikfehler: Falsche Zeitform – richtig wäre „habe ich … gemacht“ oder einfach „machte ich“."},
+      {t:" und dabei viel über Büroorganisation gelernt.", err:false},
+      {t:" Ich kann gut mit Word und Excel", err:false},
+      {t:" umgehen wei ich das schon oft benutzt habe.", err:true, hint:"Rechtschreib- und Kommafehler: „wei“ muss „weil“ heißen, und davor fehlt ein Komma."},
+      {t:" Mir ist wichtig, dass ich in einem freundlichen Team arbeiten kann", err:false},
+      {t:" und ich denke das passt bei euch super", err:true, hint:"Kommafehler und falscher Ton: Vor „das“ fehlt ein Komma, und „bei euch super“ ist zu umgangssprachlich."},
+      {t:" gut.", err:false},
+      {t:" Über eine Einladung zum Vorstellungsgespräch ", err:false},
+      {t:"würde ich mich freuen", err:false},
+      {t:" Mit freundlichen Grüßen", err:true, hint:"Kommafehler: Vor der Grußformel bzw. nach dem vorherigen Satz fehlt ein Punkt/Komma zur klaren Trennung."},
+      {t:" Sophie Wagner", err:false},
+      {t:" sophie_loves_shopping@hotmail.com", err:true, hint:"Unseriöse E-Mail-Adresse: „sophie_loves_shopping“ gehört nicht in eine Bewerbung."}
+    ]
+  },
+  {
+    meta: "Bewerbung um einen Ausbildungsplatz – Friseurin im Salon Haarwerk",
+    segments: [
+      {t:"Hi,", err:true, hint:"Falscher Ton: „Hi“ ist für eine Bewerbung zu locker, besser eine förmliche Anrede verwenden."},
+      {t:" ich bin Mia und ich will unbedingt Friseurin bei ", err:false},
+      {t:"dir", err:true, hint:"Falscher Ton: Der Salon wird gesiezt, nicht geduzt – „bei Ihnen“."},
+      {t:" lernen.", err:false},
+      {t:" Ich schneide schon seit Jahren ", err:false},
+      {t:"meiner Familie", err:true, hint:"Grammatikfehler: Nach „schneiden“ im Sinne von „die Haare schneiden von“ ist der Dativ mit „von“ oder „meiner Familie die Haare“ nötig – so wie hier steht, fehlt das Bezugswort „die Haare“."},
+      {t:" die Haare", err:false},
+      {t:" und finde des macht mir mega spaß.", err:true, hint:"Rechtschreib- und Tonfehler: „des“ statt „das“, und „mega spaß“ ist zu umgangssprachlich sowie klein geschrieben statt „Spaß“."},
+      {t:" Ich informiere mich auch privat über neue Frisurentrends", err:false},
+      {t:" ich schaue mir viele Tutorials an.", err:true, hint:"Kommafehler: Hier fehlt ein Punkt oder Komma mit Bindewort, da zwei vollständige Sätze aneinandergereiht werden."},
+      {t:" Außerdem bin ich kontaktfreudig", err:false},
+      {t:" kreativ", err:false},
+      {t:" und ich packe gerne mit an.", err:false},
+      {t:" Ich könnte mir gut vorstellen", err:false},
+      {t:" das ich bei euch die Ausbildung mache", err:true, hint:"Rechtschreibfehler: Nach „vorstellen“ folgt der Nebensatz mit „dass“, nicht „das“."},
+      {t:" und danach auch übernommen werde.", err:false},
+      {t:" Bis bald", err:true, hint:"Falscher Ton: „Bis bald“ ist keine passende Grußformel für eine Bewerbung – besser „Mit freundlichen Grüßen“."},
+      {t:" Mia Schröder", err:false},
+      {t:" mimimausi2010@gmx.de", err:true, hint:"Unseriöse E-Mail-Adresse: Ein Kosename wie „mimimausi2010“ wirkt nicht professionell."}
+    ]
+  }
+];
+
+/* ---------- Reaktionen des Affen ---------- */
+const INSULTS = [
+  "Na toll, du dummer Esel! Weniger als 80 % — geh nochmal in die Bibliothek!",
+  "Autsch. Selbst Paul der Esel hätte mehr Fehler gefunden, du Bratpfanne.",
+  "Das war schwächer als eine leere Batterie, du Nudelholz!",
+  "Weniger als 80 %? Sogar mein Bananenschale hätte mehr erkannt, du Suppenkasper!",
+  "Oje, du Schnarchnase — da war eindeutig zu viel Kaffee und zu wenig Konzentration im Spiel.",
+  "Peinlich, peinlich! Du bist wohl eher ein Fehler-Ignorierer als ein Fehler-Finder, du Kartoffelsack.",
+  "Nicht bestanden, du Sockenpuppe! Nochmal von vorne!"
+];
+const PRAISES = [
+  "Gut gemacht! Aber nächstes Mal bitte ohne ChatGPT, ja? 😏",
+  "Respekt! Fast so gut wie ein echter Deutschlehrer — fast.",
+  "Stark! Man merkt, du hast öfter als einmal genau hingeschaut. Weiter so!",
+  "Sauber erkannt! Paul der Esel ist stolz — und ein bisschen neidisch.",
+  "Nicht schlecht! Beim nächsten Mal aber bitte selbst schreiben und nicht abschreiben, du Schlaumeier.",
+  "Wow, fast fehlerfrei erkannt! Wurde das etwa heimlich geübt?"
+];
+
+let currentTemplate = null;
+let lastIndex = -1;
+
+const letterMeta = document.getElementById('letterMeta');
+const letterBody = document.getElementById('letterBody');
+const checkBtn = document.getElementById('checkBtn');
+const newBtn = document.getElementById('newBtn');
+const selCount = document.getElementById('selCount');
+const results = document.getElementById('results');
+const scoreNumber = document.getElementById('scoreNumber');
+const revealList = document.getElementById('revealList');
+const monkeyStage = document.getElementById('monkeyStage');
+const monkeyEmoji = document.getElementById('monkeyEmoji');
+const monkeySpeech = document.getElementById('monkeySpeech');
+
+function pickTemplate(){
+  let idx;
+  if (TEMPLATES.length === 1){ idx = 0; }
+  else {
+    do { idx = Math.floor(Math.random() * TEMPLATES.length); } while (idx === lastIndex);
+  }
+  lastIndex = idx;
+  return TEMPLATES[idx];
+}
+
+function renderTemplate(tpl){
+  letterMeta.textContent = tpl.meta;
+  letterBody.innerHTML = '';
+  tpl.segments.forEach((seg, i) => {
+    if (seg.t.trim() === '' ){
+      letterBody.appendChild(document.createTextNode(seg.t));
+      return;
+    }
+    const span = document.createElement('span');
+    span.className = 'seg';
+    span.textContent = seg.t;
+    span.dataset.index = i;
+    span.tabIndex = 0;
+    span.setAttribute('role','button');
+    span.setAttribute('aria-pressed','false');
+    span.addEventListener('click', () => toggleSeg(span));
+    span.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSeg(span); }
+    });
+    letterBody.appendChild(span);
+  });
+  updateSelCount();
+}
+
+function toggleSeg(span){
+  if (checkBtn.disabled) return;
+  span.classList.toggle('selected');
+  span.setAttribute('aria-pressed', span.classList.contains('selected') ? 'true' : 'false');
+  updateSelCount();
+}
+
+function updateSelCount(){
+  const n = letterBody.querySelectorAll('.seg.selected').length;
+  selCount.textContent = n === 0 ? 'Noch nichts markiert' : (n + (n===1 ? ' Stelle markiert' : ' Stellen markiert'));
+}
+
+function startRound(){
+  results.style.display = 'none';
+  checkBtn.disabled = false;
+  checkBtn.textContent = 'Auswerten';
+  currentTemplate = pickTemplate();
+  renderTemplate(currentTemplate);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function evaluate(){
+  const spans = Array.from(letterBody.querySelectorAll('.seg'));
+  let correct = 0;
+  const missed = [];
+  const falsePos = [];
+  const hits = [];
+
+  spans.forEach(span => {
+    const i = Number(span.dataset.index);
+    const seg = currentTemplate.segments[i];
+    const selected = span.classList.contains('selected');
+    if (seg.err && selected){ correct++; hits.push(seg); span.classList.add('reveal-hit'); }
+    else if (seg.err && !selected){ missed.push(seg); span.classList.add('reveal-miss'); }
+    else if (!seg.err && selected){ falsePos.push(seg); span.classList.add('reveal-false'); }
+    else { correct++; }
+    span.classList.remove('selected');
+  });
+
+  const total = spans.length;
+  const pct = Math.round((correct/total)*100);
+
+  scoreNumber.textContent = pct + '%';
+  revealList.innerHTML = '';
+
+  hits.forEach(seg => addResultItem('✓ erkannt', seg.hint, 'hit'));
+  missed.forEach(seg => addResultItem('✗ übersehen', seg.hint, 'miss'));
+  falsePos.forEach(seg => addResultItem('war ok', 'Das war eigentlich richtig — hier war gar kein Fehler: „' + seg.t.trim() + '“.', 'falsepos'));
+
+  if (hits.length === 0 && missed.length === 0 && falsePos.length === 0){
+    addResultItem('Alles korrekt!', 'Du hast exakt die richtigen Stellen markiert.', 'hit');
+  }
+
+  results.style.display = 'block';
+  checkBtn.disabled = true;
+
+  if (pct < 80){
+    monkeyStage.className = 'monkey-stage bad';
+    monkeyEmoji.textContent = '🙈';
+    monkeySpeech.textContent = INSULTS[Math.floor(Math.random()*INSULTS.length)];
+  } else {
+    monkeyStage.className = 'monkey-stage good';
+    monkeyEmoji.textContent = '🐵';
+    monkeySpeech.textContent = PRAISES[Math.floor(Math.random()*PRAISES.length)];
+  }
+  // restart animation
+  void monkeyEmoji.offsetWidth;
+
+  results.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function addResultItem(tagText, text, cls){
+  const li = document.createElement('li');
+  li.className = cls;
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = tagText;
+  li.appendChild(tag);
+  li.appendChild(document.createTextNode(text));
+  revealList.appendChild(li);
+}
+
+checkBtn.addEventListener('click', evaluate);
+newBtn.addEventListener('click', startRound);
+
+startRound();
+</script>
+</body>
+</html>
